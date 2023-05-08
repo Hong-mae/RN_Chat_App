@@ -1,20 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Logout from "./Logout";
 import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import axios from "axios";
 import { getAllmessageRoute, sendMessageRoute } from "../utils/APIRouters";
+import { v4 as uuidv4 } from "uuid";
 
-export default function ChatContainer({ currentChat, currentUser }) {
+export default function ChatContainer({ currentChat, currentUser, socket }) {
     const [messages, setMessages] = useState([]);
+    const [arrivalMessage, setArrivalMessage] = useState(null);
+    const scrollRef = useRef();
+
     const handleSendMsg = async (msg) => {
         await axios.post(sendMessageRoute, {
-            from: currentUser._id,
             to: currentChat._id,
+            from: currentUser._id,
             message: msg,
         });
+        socket.current.emit("send-msg", {
+            to: currentChat._id,
+            from: currentUser._id,
+            message: msg,
+        });
+
+        const msgs = [...messages];
+        msgs.push({ fromSelf: true, message: msg });
+        setMessages(msgs);
     };
+
+    useEffect(() => {
+        if (socket.current) {
+            socket.current.on("msg-recieve", (msg) => {
+                console.log(msg);
+                setArrivalMessage({ fromSelf: false, message: msg });
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
+    }, [arrivalMessage]);
+
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     const getAllMessages = async () => {
         const messages = await axios.post(getAllmessageRoute, {
@@ -48,10 +78,11 @@ export default function ChatContainer({ currentChat, currentUser }) {
                         <Logout />
                     </div>
                     <div className="chat-messages">
-                        {messages.map((message) => {
+                        {messages.map((message, index) => {
                             return (
-                                <div>
+                                <div ref={scrollRef} key={index}>
                                     <div
+                                        key={index}
                                         className={`message ${
                                             message.fromSelf
                                                 ? "sended"
@@ -75,6 +106,13 @@ export default function ChatContainer({ currentChat, currentUser }) {
 
 const Container = styled.div`
     padding-top: 1rem;
+    display: grid;
+    grid-template-rows: 10% 78% 12%;
+    gap: 0.1rem;
+    overflow: hidden;
+    @media screen and (min-width: 720px) and (min-width: 1080px) {
+        grid-auto-rows: 15% 70% 15%;
+    }
     .chat-header {
         display: flex;
         justify-content: space-between;
@@ -102,7 +140,15 @@ const Container = styled.div`
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        overflow: auth;
+        overflow: auto;
+        &::-webkit-scrollbar {
+            width: 0.2rem;
+            &-thumb {
+                background-color: #ffffff39;
+                width: 0.1rem;
+                border-radius: 1rem;
+            }
+        }
         .message {
             display: flex;
             align-items: center;

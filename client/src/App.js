@@ -6,11 +6,6 @@ import Register from "./pages/Register";
 import SetAvatar from "./pages/SetAvatar";
 
 function App() {
-
-    useEffect(() => {
-        console.log("app");
-    });
-
     return (
         <BrowserRouter>
             <Routes>

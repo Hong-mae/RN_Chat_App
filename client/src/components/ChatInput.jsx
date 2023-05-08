@@ -96,20 +96,25 @@ const Container = styled.div`
     }
 
     .input-container {
-        display: flex;
         width: 100%;
         border-radius: 2rem;
+        display: flex;
         align-items: center;
         gap: 2rem;
         background-color: #ffffff34;
+        @media screen and (min-width: 720px) and (max-width: 1080px) {
+            padding: 0 1rem;
+            gap: 1rem;
+        }
         input {
-            width: 80%;
+            width: 90%;
             height: 60%;
             background-color: transparent;
             color: white;
             border: none;
             padding-left: 1rem;
             font-size: 1.2rem;
+
             &::selection {
                 background-color: #9186f3;
             }
@@ -125,6 +130,12 @@ const Container = styled.div`
             align-items: center;
             background-color: #9a86f3;
             border: none;
+            @media screen and (min-width: 720px) and (max-width: 1080px) {
+                padding: 0.3rem 1rem;
+                svg {
+                    font-size: 1rem;
+                }
+            }
             svg {
                 font-size: 2rem;
                 color: white;
