@@ -21,6 +21,7 @@ export default function ChatInput({ handleSendMsg }) {
     const sendChat = (event) => {
         event.preventDefault();
         if (msg.length > 0) {
+            if (showEmojiPicker) setShowEmojiPicker(false);
             handleSendMsg(msg);
             setMsg("");
         }
@@ -41,7 +42,6 @@ export default function ChatInput({ handleSendMsg }) {
                     type="text"
                     placeholder="type your message here."
                     value={msg}
-                    on
                     onChange={(e) => setMsg(e.target.value)}
                 />
                 <button className="submit">
